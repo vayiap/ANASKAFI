@@ -191,35 +191,58 @@ document.getElementById('getGPS').addEventListener('click', () => {
     </div>
 
    
-<script><script>const canvas = document.getElementById('drawingCanvas');
-        const ctx = canvas.getContext('2d');
-        let isDrawing = false;
+<script>const canvas = document.getElementById('drawingCanvas');
+const ctx = canvas.getContext('2d');
+let isDrawing = false;
 
-        canvas.addEventListener('mousedown', (e) => {
-            isDrawing = true;
-            ctx.beginPath();
-            const rect = canvas.getBoundingClientRect();
-            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-        });
+function getPosition(e) {
+  const rect = canvas.getBoundingClientRect();
+  if (e.touches) {
+    return {
+      x: e.touches[0].clientX - rect.left,
+      y: e.touches[0].clientY - rect.top
+    };
+  } else {
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    };
+  }
+}
 
-        canvas.addEventListener('mousemove', (e) => {
-            if (!isDrawing) return;
-            const rect = canvas.getBoundingClientRect();
-            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-            ctx.stroke();
-        });
+// Mouse events
+canvas.addEventListener('mousedown', (e) => {
+  isDrawing = true;
+  const pos = getPosition(e);
+  ctx.beginPath();
+  ctx.moveTo(pos.x, pos.y);
+});
+canvas.addEventListener('mousemove', (e) => {
+  if (!isDrawing) return;
+  const pos = getPosition(e);
+  ctx.lineTo(pos.x, pos.y);
+  ctx.stroke();
+});
+canvas.addEventListener('mouseup', () => isDrawing = false);
+canvas.addEventListener('mouseleave', () => isDrawing = false);
 
-        canvas.addEventListener('mouseup', () => {
-            isDrawing = false;
-        });
+// Touch events
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  isDrawing = true;
+  const pos = getPosition(e);
+  ctx.beginPath();
+  ctx.moveTo(pos.x, pos.y);
+});
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  if (!isDrawing) return;
+  const pos = getPosition(e);
+  ctx.lineTo(pos.x, pos.y);
+  ctx.stroke();
+});
+canvas.addEventListener('touchend', () => isDrawing = false);
 
-        canvas.addEventListener('mouseleave', () => {
-            isDrawing = false;
-        });
-
-        document.getElementById('clearCanvas').addEventListener('click', () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        });
 
         // Register service worker
         if ('serviceWorker' in navigator) {
