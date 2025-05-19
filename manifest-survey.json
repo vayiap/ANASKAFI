@@ -1,0 +1,21 @@
+{
+  "name": "ANASKAFI Survey",
+  "short_name": "Survey",
+  "start_url": "./index-survey.html",
+  "display": "standalone",
+  "background_color": "#f8f9fa",
+  "theme_color": "#444444",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "anaskafi-pattern.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "anaskafi-pattern.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
