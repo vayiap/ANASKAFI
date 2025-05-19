@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ANASKAFI - Archaeological Logging Tool</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#444444" />
+    <link rel="icon" href="anaskafi-pattern.png" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js">
+document.getElementById('getGPS').addEventListener('click', () => {
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const coords = position.coords.latitude + ", " + position.coords.longitude;
+        document.getElementById('gps').value = coords;
+      },
+      error => {
+        alert('Unable to retrieve location.');
+      }
+    );
+  } else {
+    alert('Geolocation not supported.');
+  }
+});
+
+</script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            background-image: url('anaskafi-pattern.png');
+            background-size: 100px;
+            background-repeat: repeat;
+            background-attachment: fixed;
+        }
+
+        h1, h2 {
+            color: #fdd835;
+            text-align: center;
+        }
+
+        canvas {
+            background: white;
+            border: 1px solid #ccc;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .section {
+            background: rgba(51, 51, 51, 0.85);
+            padding: 2rem;
+            border-radius: 10px;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .btn-warning {
+            color: black;
+        }
+
+        form {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        #installBanner {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: #333;
+            color: #fff;
+            padding: 1rem;
+            border-radius: 5px;
+            display: none;
+            z-index: 1000;
+        }
+
+            #installBanner button {
+                margin-left: 1rem;
+            }
+
+        @media screen and (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+
+            canvas {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="section">
+  <h1>ANASKAFI</h1>
+  <h2 class="text-center">Excavation</h2>
+  <div class="text-center">
+    <img src="anaskafi-pattern.png" alt="Anaskafi Logo" style="max-height: 120px; max-width: 100%;" />
+  </div>
+</div>
+<div class="section">
+<h2>Excavation Data</h2>
+<form id="excavation-form">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="stratigraphyUnit" class="form-label">Stratigraphy Unit</label>
+                    <input type="text" class="form-control" id="stratigraphyUnit" required />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="trench" class="form-label">Trench</label>
+                    <input type="text" class="form-control" id="trench" required />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="supervisor" class="form-label">Supervisor</label>
+                    <input type="text" class="form-control" id="supervisor" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="openDate" class="form-label">Open Date</label>
+                    <input type="date" class="form-control" id="openDate" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="closeDate" class="form-label">Close Date</label>
+                    <input type="date" class="form-control" id="closeDate" />
+                </div>
+                <div class="col-md-12 mb-3">
+                    <label for="bucketCount" class="form-label">Bucket Count</label>
+                    <input type="number" class="form-control" id="bucketCount" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="descriptionShort" class="form-label">Description Short</label>
+                <input type="text" class="form-control" id="descriptionShort" />
+            </div>
+            <div class="mb-3">
+                <label for="formationProcess" class="form-label">Formation Process</label>
+                <input type="text" class="form-control" id="formationProcess" />
+            </div>
+            <div class="mb-3 row">
+                <div class="col">
+                    <label for="groupSection" class="form-label">Group Section</label>
+                    <input type="text" class="form-control" id="groupSection" />
+                </div>
+                <div class="col">
+                    <label for="depth" class="form-label">Depth</label>
+                    <input type="text" class="form-control" id="depth" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="preservation" class="form-label">Preservation</label>
+                <input type="text" class="form-control" id="preservation" />
+            </div>
+            <div class="mb-3">
+                <label for="contamination" class="form-label">Contamination</label>
+                <input type="text" class="form-control" id="contamination" />
+            </div>
+            <div class="mb-3">
+                <label for="soilSamples" class="form-label">Soil Samples</label>
+                <input type="text" class="form-control" id="soilSamples" />
+            </div>
+            <div class="mb-3">
+                <label for="layerDescription" class="form-label">Layer Description</label>
+                <textarea class="form-control" id="layerDescription" rows="3"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="excavationPhotos" class="form-label">Photos</label>
+                <input type="file" class="form-control" id="excavationPhotos" multiple />
+            </div>
+            <div class="mb-3">
+                <label for="postExcavationNotes" class="form-label">Post-Excavation Notes</label>
+                <textarea class="form-control" id="postExcavationNotes" rows="3"></textarea>
+            </div>
+            <div class="d-grid gap-2 d-md-block">
+                <button type="submit" class="btn btn-primary">Submit Excavation</button>
+                <button type="button" class="btn btn-secondary ms-md-2 mt-2 mt-md-0" id="exportExcavationCSV">Export Excavation CSV</button>
+            </div>
+        </form>
+    </div>
+    </div>
+
+    <div id="installBanner">
+        <span>Add this app to your home screen?</span>
+        <button class="btn btn-sm btn-success" id="installBtn">Install</button>
+    </div>
+
+    <script>const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            ctx.beginPath();
+            const rect = canvas.getBoundingClientRect();
+            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.stroke();
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isDrawing = false;
+        });
+
+        document.getElementById('clearCanvas').addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log('Service worker registered.', reg))
+                .catch(err => console.error('Service worker registration failed:', err));
+        }
+
+        // Handle PWA install prompt
+        let deferredPrompt;
+        const banner = document.getElementById('installBanner');
+        const installBtn = document.getElementById('installBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            banner.style.display = 'block';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the A2HS prompt');
+                }
+                deferredPrompt = null;
+                banner.style.display = 'none';
+            }
+        });
+document.getElementById('getGPS').addEventListener('click', () => {
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const coords = position.coords.latitude + ", " + position.coords.longitude;
+        document.getElementById('gps').value = coords;
+      },
+      error => {
+        alert('Unable to retrieve location.');
+      }
+    );
+  } else {
+    alert('Geolocation not supported.');
+  }
+});
+
+</script>
+
+<script src="https://unpkg.com/dexie@3.2.2/dist/dexie.min.js">
+document.getElementById('getGPS').addEventListener('click', () => {
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const coords = position.coords.latitude + ", " + position.coords.longitude;
+        document.getElementById('gps').value = coords;
+      },
+      error => {
+        alert('Unable to retrieve location.');
+      }
+    );
+  } else {
+    alert('Geolocation not supported.');
+  }
+});
+
+</script>
+<script>
+  const db = new Dexie("AnaskafiDB");
+  db.version(1).stores({
+    fieldData: '++id,date,username,siteName,gridNumber,findType,topography,vegetation,landUse,notes,gps,photo,drawing',
+    excavationData: '++id,stratigraphyUnit,trench,supervisor,openDate,closeDate,bucketCount,descriptionShort,formationProcess,groupSection,depth,preservation,contamination,soilSamples,layerDescription,postExcavationNotes'
+  });
+
+  // Submit field data
+  document.getElementById('data-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const canvas = document.getElementById('drawingCanvas');
+    const drawing = canvas.toDataURL();
+
+    const data = {
+      date: document.getElementById('date').value,
+      username: document.getElementById('username').value,
+      siteName: document.getElementById('siteName').value,
+      gridNumber: document.getElementById('gridNumber').value,
+      findType: document.getElementById('findType').value,
+      topography: document.getElementById('topography').value,
+      vegetation: document.getElementById('vegetation').value,
+      landUse: document.getElementById('landUse').value,
+      notes: document.getElementById('notes').value,
+      gps: document.getElementById('gps').value,
+      drawing: drawing,
+      photo: ''
+    };
+    db.fieldData.add(data);
+    alert('Field data saved!');
+    document.getElementById('data-form').reset();
+  });
+
+  // Export field data
+  document.getElementById('exportCSV').addEventListener('click', async () => {
+    const data = await db.fieldData.toArray();
+    if (!data.length) return alert('No data to export.');
+    const keys = Object.keys(data[0]);
+    const csv = [keys.join(',')];
+    data.forEach(entry => {
+      csv.push(keys.map(k => `"${(entry[k] || '').toString().replace(/"/g, '""')}"`).join(','));
+    });
+    const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'field_data.csv';
+    a.click();
+  });
+
+  // Export JSON
+  document.getElementById('exportJSON').addEventListener('click', async () => {
+    const data = await db.fieldData.toArray();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'field_data.json';
+    a.click();
+  });
+
+  // Clear field data
+  document.getElementById('clearData').addEventListener('click', async () => {
+    if (confirm('Clear all field data?')) {
+      await db.fieldData.clear();
+      alert('Data cleared.');
+    }
+  });
+
+  // Submit excavation data
+  document.getElementById('excavation-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {
+      stratigraphyUnit: document.getElementById('stratigraphyUnit').value,
+      trench: document.getElementById('trench').value,
+      supervisor: document.getElementById('supervisor').value,
+      openDate: document.getElementById('openDate').value,
+      closeDate: document.getElementById('closeDate').value,
+      bucketCount: document.getElementById('bucketCount').value,
+      descriptionShort: document.getElementById('descriptionShort').value,
+      formationProcess: document.getElementById('formationProcess').value,
+      groupSection: document.getElementById('groupSection').value,
+      depth: document.getElementById('depth').value,
+      preservation: document.getElementById('preservation').value,
+      contamination: document.getElementById('contamination').value,
+      soilSamples: document.getElementById('soilSamples').value,
+      layerDescription: document.getElementById('layerDescription').value,
+      postExcavationNotes: document.getElementById('postExcavationNotes').value
+    };
+    await db.excavationData.add(data);
+    alert('Excavation data saved!');
+    document.getElementById('excavation-form').reset();
+  });
+
+  // Export excavation data
+  document.getElementById('exportExcavationCSV').addEventListener('click', async () => {
+    const data = await db.excavationData.toArray();
+    if (!data.length) return alert('No data to export.');
+    const keys = Object.keys(data[0]);
+    const csv = [keys.join(',')];
+    data.forEach(entry => {
+      csv.push(keys.map(k => `"${(entry[k] || '').toString().replace(/"/g, '""')}"`).join(','));
+    });
+    const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'excavation_data.csv';
+    a.click();
+  });
+
+document.getElementById('getGPS').addEventListener('click', () => {
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const coords = position.coords.latitude + ", " + position.coords.longitude;
+        document.getElementById('gps').value = coords;
+      },
+      error => {
+        alert('Unable to retrieve location.');
+      }
+    );
+  } else {
+    alert('Geolocation not supported.');
+  }
+});
+
+</script>
+
+</body>
+</html>
+
+</div>
+<script>
+
+  document.getElementById('excavation-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {
+      stratigraphyUnit: document.getElementById('stratigraphyUnit').value,
+      trench: document.getElementById('trench').value,
+      supervisor: document.getElementById('supervisor').value,
+      openDate: document.getElementById('openDate').value,
+      closeDate: document.getElementById('closeDate').value,
+      bucketCount: document.getElementById('bucketCount').value,
+      descriptionShort: document.getElementById('descriptionShort').value,
+      formationProcess: document.getElementById('formationProcess').value,
+      groupSection: document.getElementById('groupSection').value,
+      depth: document.getElementById('depth').value,
+      preservation: document.getElementById('preservation').value,
+      contamination: document.getElementById('contamination').value,
+      soilSamples: document.getElementById('soilSamples').value,
+      layerDescription: document.getElementById('layerDescription').value,
+      postExcavationNotes: document.getElementById('postExcavationNotes').value
+    };
+    await db.excavationData.add(data);
+    alert('Excavation data saved!');
+    document.getElementById('excavation-form').reset();
+  });
+
+  // Export excavation data
+  document.getElementById('exportExcavationCSV').addEventListener('click', async () => {
+    const data = await db.excavationData.toArray();
+    if (!data.length) return alert('No data to export.');
+    const keys = Object.keys(data[0]);
+    const csv = [keys.join(',')];
+    data.forEach(entry => {
+      csv.push(keys.map(k => `"${(entry[k] || '').toString().replace(/"/g, '""')}"`).join(','));
+    });
+    const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'excavation_data.csv';
+    a.click();
+  });
+
+document.getElementById('getGPS').addEventListener('click', () => {
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const coords = position.coords.latitude + ", " + position.coords.longitude;
+        document.getElementById('gps').value = coords;
+      },
+      error => {
+        alert('Unable to retrieve location.');
+      }
+    );
+  } else {
+    alert('Geolocation not supported.');
+  }
+});
+
+</script>
+
+</body>
+</html>
+
+</script>
+</body></html>
